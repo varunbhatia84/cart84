@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Create a AWS Keypair
+    ec2_key:
+      name: my_keypair
+      key_material: "{{ lookup('file', '/home/ec2-user/.ssh/id_rsa.pub') }}"
+  - name: Create a Security group for EC2
+    ec2_group:
+      name: websg
+      description: web server security Group
+      vpc_id: vpc-0f8ff8d9c74bf93b8
+      region: us-east-1
+      rules:
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+  - ec2_instance:
+      name: "public-compute-instance"
+      key_name: my_keypair
+      vpc_subnet_id: subnet-01868dcfa8dda6757
+      instance_type: t2.micro
+      security_group: websg
+      network:
+        assign_public_ip: true
+      image_id: ami-02354e95b39ca8dec
+      tags:
+        Name: webserver
