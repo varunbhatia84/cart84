@@ -1,13 +1,22 @@
 ---
 - name: Stop the VM
   ec2_instance:
+    region: "{{ awsregion }}"
     state: stopped
     instance_ids:
       - "{{ webinstanceid }}"
 - name: create a AMI
   ec2_ami:
+    region: "{{ awsregion }}"
     instance_id: "{{ webinstanceid }}"
     wait: yes
     name: "webapp-{{ versionid }}"
     tags:
       Name: "webapp-{{ versionid }}"
+  register: imageout
+- debug:
+    var: imageout
+- name: write image id
+  copy:
+    content: "webappimageid: {{ imageout.image_id }}"
+    dest: image.yaml
